@@ -220,7 +220,7 @@ class JacksCarRental:
         cmaplist = [plt.cm.RdBu(i) for i in range(plt.cm.RdBu.N)]
         dRbBu = matplotlib.colors.LinearSegmentedColormap.from_list(
             'dRdBu', cmaplist, plt.cm.RdBu.N)
-        sns.heatmap(self.policy, vmin=-10, vmax=10, cmap=dRbBu,
+        sns.heatmap(self.policy, vmin=-MAX_MOVE, vmax=MAX_MOVE, cmap=dRbBu,
                     ax=ax[1], cbar_kws={"ticks": ACTIONS, "boundaries": ACTIONS})
         ax[1].set_ylim(0, MAX_CARS+1)
         ax[1].set_title("Policy π")
@@ -246,7 +246,7 @@ class JacksCarRental:
             (float): the renewed value V(s) of the current state pair
         """
         a = self.get_valid_action(state, action)
-        s = self.step(state, action)
+        s = self.step(state, a)
         r = self.get_reward(s)
 
         state_value = CAR_MOVE_REWARD * abs(a)
@@ -303,7 +303,10 @@ class JacksCarRental:
                 # π(s) <- argmax_a Σ_s',r p(s', r | s, a) [R(s) + γV(s')]
                 max_value = float("-inf")
                 for action in self.get_available_actions(state):
-                    value = self.bellman_expectation(state, action)
+                    try:
+                        value = self.bellman_expectation(state, action)
+                    except:
+                        print(state, self.get_available_actions(state))
                     if value > max_value:
                         max_value = value
                         # update π(s)
